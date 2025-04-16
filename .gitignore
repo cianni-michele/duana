@@ -13,3 +13,6 @@ Makefile
 
 # Misc
 *~
+
+# Python byte‑code cache
+__pycache__/
