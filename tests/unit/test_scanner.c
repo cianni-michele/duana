@@ -10,39 +10,40 @@ int main(void) {
     // Create a temporary directory
     char template[] = "/tmp/duana_testXXXXXX";
     char *dir = mkdtemp(template);
-    if (!dir) {
-        perror("mkdtemp");
-        return 1;
-    }
+    assert(dir && "mkdtemp failed");
 
-    // Create two regular files
+    // Create two files with known contents
     char pathbuf[PATH_MAX];
-    snprintf(pathbuf, PATH_MAX, "%s/file1.txt", dir);
-    FILE *f1 = fopen(pathbuf, "w");
+    snprintf(pathbuf, PATH_MAX, "%s/file1.bin", dir);
+    FILE *f1 = fopen(pathbuf, "wb");
     assert(f1);
-    fputs("hello", f1);
+    // Write 10 bytes
+    for (int i = 0; i < 10; i++) fputc('A', f1);
     fclose(f1);
 
-    snprintf(pathbuf, PATH_MAX, "%s/file2.log", dir);
-    FILE *f2 = fopen(pathbuf, "w");
+    snprintf(pathbuf, PATH_MAX, "%s/file2.bin", dir);
+    FILE *f2 = fopen(pathbuf, "wb");
     assert(f2);
-    fputs("world", f2);
+    // Write 20 bytes
+    for (int i = 0; i < 20; i++) fputc('B', f2);
     fclose(f2);
 
-    // Create a subdirectory (should be ignored)
+    // Create a subdirectory (ignored)
     snprintf(pathbuf, PATH_MAX, "%s/subdir", dir);
     mkdir(pathbuf, 0755);
 
     // Perform scan
-    DirectoryInfo info = { .path = dir, .totalFiles = 0 };
+    DirectoryInfo info = { .path = dir, .totalFiles = 0, .totalSize = 0 };
     int ret = scan_directory(info.path, &info);
     assert(ret == 0);
     assert(info.totalFiles == 2);
+    // Expect 10 + 20 = 30 bytes
+    assert(info.totalSize == 30UL);
 
     // Cleanup
-    snprintf(pathbuf, PATH_MAX, "%s/file1.txt", dir);
+    snprintf(pathbuf, PATH_MAX, "%s/file1.bin", dir);
     remove(pathbuf);
-    snprintf(pathbuf, PATH_MAX, "%s/file2.log", dir);
+    snprintf(pathbuf, PATH_MAX, "%s/file2.bin", dir);
     remove(pathbuf);
     snprintf(pathbuf, PATH_MAX, "%s/subdir", dir);
     rmdir(pathbuf);

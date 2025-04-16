@@ -18,5 +18,6 @@ int main(int argc, char *argv[]) {
 
     printf("Directory: %s\n", info.path);
     printf("Total files: %zu\n", info.totalFiles);
+    printf("Total size: %lu bytes\n", info.totalSize);
     return EXIT_SUCCESS;
 }
