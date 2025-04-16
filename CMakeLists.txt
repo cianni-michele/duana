@@ -21,3 +21,11 @@ add_executable(duana ${SOURCES})
 
 # Enable testing
 enable_testing()
+
+# Simple unit test executable (uses <assert.h>)
+add_executable(test_scanner
+    tests/unit/test_scanner.c
+    src/scanner.c
+)
+target_include_directories(test_scanner PRIVATE ${CMAKE_SOURCE_DIR}/include)
+add_test(NAME test_scanner COMMAND test_scanner)
