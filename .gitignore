@@ -1,19 +1,17 @@
 # Build artifacts
 /build/
 /CMakeFiles/
-/CMakeCache.txt
+CMakeCache.txt
 cmake_install.cmake
 Makefile
 *.o
-*.obj
-*.exe
 
-# VSCode settings
+# VSCode
 .vscode/
+
+# Python cache
+__pycache__/
+.pytest_cache/
 
 # Misc
 *~
-
-# Python byte‑code cache
-__pycache__/
-.pytest_cache/

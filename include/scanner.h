@@ -1,19 +1,20 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
-#include "duana_config.h"
+#include "config.h"
 #include <stddef.h>
 
+// Directory statistics
 typedef struct {
-    const char *path;         // Directory path being scanned
-    size_t totalFiles;        // Count of regular files
-    unsigned long totalSize;  // Sum of st_size for all regular files
+    const char* path;
+    size_t totalFiles;
+    unsigned long totalSize;
 } DirectoryInfo;
 
 /**
- * Scans directory non-recursively, counts files, sizes, applying extension filter.
- * Returns -1 on opendir() failure, 0 otherwise.
+ * Scan directory non-recursively, filtering and accumulating stats.
+ * @return 0 on success, -1 on opendir failure.
  */
-int scan_directory(const char *path, DirectoryInfo *info, const Config *config);
+int scan_directory(const char* path, DirectoryInfo* info, const Config* cfg);
 
 #endif // SCANNER_H
