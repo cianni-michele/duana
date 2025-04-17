@@ -5,8 +5,10 @@
 #include <limits.h>
 #include <stdlib.h>
 #include "scanner.h"
+#include "duana_config.h"
 
-int main(void) {
+int main(void) 
+{
     // Create a temporary directory
     char template[] = "/tmp/duana_testXXXXXX";
     char *dir = mkdtemp(template);
@@ -32,12 +34,18 @@ int main(void) {
     snprintf(pathbuf, PATH_MAX, "%s/subdir", dir);
     mkdir(pathbuf, 0755);
 
+    // Base config (no filter extensions)
+    Config config = {
+        .filterExtensions = false,
+        .extensions = NULL,
+        .extensionsCount = 0
+    };
+
     // Perform scan
     DirectoryInfo info = { .path = dir, .totalFiles = 0, .totalSize = 0 };
-    int ret = scan_directory(info.path, &info);
+    int ret = scan_directory(info.path, &info, &config);
     assert(ret == 0);
     assert(info.totalFiles == 2);
-    // Expect 10 + 20 = 30 bytes
     assert(info.totalSize == 30UL);
 
     // Cleanup

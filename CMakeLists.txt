@@ -8,24 +8,30 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Include project headers
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-# Source files
+# Source files for main executable
 set(SOURCES
     src/main.c
     src/scanner.c
     src/output.c
     src/utils.c
 )
-
-# Define the executable
 add_executable(duana ${SOURCES})
 
-# Enable testing
 enable_testing()
 
-# Simple unit test executable (uses <assert.h>)
+# Unit test: scanner
 add_executable(test_scanner
     tests/unit/test_scanner.c
     src/scanner.c
+    src/utils.c
 )
 target_include_directories(test_scanner PRIVATE ${CMAKE_SOURCE_DIR}/include)
 add_test(NAME test_scanner COMMAND test_scanner)
+
+# Unit test: extension matching
+add_executable(test_utils
+    tests/unit/test_utils.c
+    src/utils.c
+)
+target_include_directories(test_utils PRIVATE ${CMAKE_SOURCE_DIR}/include)
+add_test(NAME test_utils COMMAND test_utils)

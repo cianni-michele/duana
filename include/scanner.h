@@ -1,6 +1,7 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
+#include "duana_config.h"
 #include <stddef.h>
 
 typedef struct {
@@ -10,13 +11,9 @@ typedef struct {
 } DirectoryInfo;
 
 /**
- * scan_directory:
- *   Scans the given directory (non-recursively) and:
- *     - increments info->totalFiles for each regular file
- *     - adds st_size to info->totalSize
- *   On failure to open directory: logs a warning and returns -1.
- *   On success returns 0.
+ * Scans directory non-recursively, counts files, sizes, applying extension filter.
+ * Returns -1 on opendir() failure, 0 otherwise.
  */
-int scan_directory(const char *path, DirectoryInfo *info);
+int scan_directory(const char *path, DirectoryInfo *info, const Config *config);
 
 #endif // SCANNER_H
