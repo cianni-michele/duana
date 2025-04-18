@@ -98,4 +98,4 @@ duana/
 - Export results to JSON
 - Signal handling (e.g., SIGINT for graceful termination)
 
-*Originally created for the Operating Systems course at XYZ University.*
+*Originally created for the Operating Systems course at University of Camerino.*
