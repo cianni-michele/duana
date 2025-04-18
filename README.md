@@ -1,58 +1,57 @@
 # Disk Usage Analyzer (`duana`)
 
-**duana** è un tool da linea di comando per analizzare lo spazio su disco all'interno di una singola directory, fornendo un riepilogo del numero di file e della loro dimensione totale. Supporta inoltre un filtro per estensioni di file.
+**duana** is a command-line tool that analyzes disk usage within a single directory by counting files and summing their sizes. It also supports filtering files by extension.
 
 ---
 
-## Caratteristiche
+## Features
 
-- **Conteggio file**: conta i file regolari presenti nella directory specificata.
-- **Somma dimensioni**: calcola la somma delle dimensioni in byte di tutti i file conteggiati.
-- **Filtro per estensioni**: opzione `--types` per considerare solo file con specifiche estensioni, ad esempio `--types=.c,.txt`.
-- **Modularità**: architettura basata su moduli `cli`, `config`, `scanner`, `utils` e `output`.
-- **Testing**: suite di test unitari in C e test di integrazione in Python (pytest).
-- **Stile di codice**: formattazione con `.clang-format` (LLVM style).
+- **File counting**: Counts the regular files in the specified directory.
+- **Size aggregation**: Computes the total size (in bytes) of all counted files.
+- **Extension filter**: `--types` option to include only files with given extensions (e.g. `--types=.c,.txt`).
+- **Modular design**: Components separated into `cli`, `config`, `scanner`, `utils`, and `output` modules.
+- **Testing**: Unit tests in C and integration tests in Python (pytest).
+- **Code style**: Formatted with `.clang-format` using the LLVM style.
 
-## Requisiti
+## Requirements
 
-- Ubuntu (o altra distribuzione Linux compatibile)
-- Compilatore C che supporti C11 (es. `gcc` >= 5.0)
-- [CMake](https://cmake.org/) >= 3.10
-- Python 3 + [pytest](https://docs.pytest.org/)
+- Ubuntu (or compatible Linux distribution)
+- C compiler with C11 support (e.g., `gcc` ≥ 5.0)
+- [CMake](https://cmake.org/) ≥ 3.10
+- Python 3 and [pytest](https://docs.pytest.org/)
 
-## Installazione e build
+## Build Instructions
 
-Esegui i comandi seguenti dalla radice del progetto:
+From the project root, run:
 
 ```bash
-# Crea la cartella di build out-of-source
 mkdir -p build && cd build
-# Genera i file di build con CMake
 cmake ..
-# Compila l'eseguibile e i test
 cmake --build .
 ```
 
-## Uso
+This creates the `duana` executable and unit tests.
+
+## Usage
 
 ```bash
 ./duana <directory> [--types=.ext1,.ext2,...]
 ```
 
-- `<directory>`: path della directory da analizzare.
-- `--types=<ext_list>`: (opzionale) lista di estensioni separate da virgola. Solo i file con queste estensioni saranno conteggiati.
+- `<directory>`: Path to the directory to analyze.
+- `--types=<ext_list>`: (optional) Comma-separated list of extensions to include.
 
-### Esempi
+### Examples
 
 ```bash
-# Analizza /home/user/docs senza filtro
+# Analyze /home/user/docs without filtering
 ./duana /home/user/docs
 
-# Analizza /home/user/src filtrando solo .c e .h
+# Analyze /home/user/src, counting only .c and .h files
 ./duana /home/user/src --types=.c,.h
 ```
 
-In output vedrai:
+Output format:
 
 ```plaintext
 Directory: /home/user/docs
@@ -60,50 +59,43 @@ Total files: 42
 Total size: 1234567 bytes
 ```
 
-## Test
+## Tests
 
-Dalla cartella `build`, esegui:
+From the `build` directory:
 
 ```bash
-# Test unitari in C
-test_scanner
-# oppure con CTest (richiede cmake --build . prima)
+# Run C unit tests with CTest
 ctest --output-on-failure
 
-# Test di integrazione Python
-desde la root del progetto
+# Run Python integration tests from project root
 pytest tests/integration_py
 ```
 
-## Formattazione del codice
+## Code Formatting
 
-Per applicare lo stile definito in `.clang-format`:
+Ensure consistent style with:
 
 ```bash
-clang-format -i $(find . -name "*.c" -o -name "*.h")
+clang-format -i $(find . -name '*.c' -o -name '*.h')
 ```
 
-## Struttura del progetto
+## Project Structure
 
 ```plaintext
 duana/
-├── include/         # file header pubblici
-├── src/             # sorgenti C
-├── tests/
-│   ├── unit/        # test unitari C
-│   └── integration/ # test di integrazione Python
-├── .clang-format    # configurazione formatter
-├── CMakeLists.txt   # script di build
+├── include/            # Public header files
+├── src/                # C source files
+├── tests/              # Unit and integration tests
+├── .clang-format       # clang-format configuration
+├── CMakeLists.txt      # Build script
 ├── .gitignore
-└── build/           # directory di build (non versionata)
+└── build/              # Out-of-source build directory
 ```
 
 ## Roadmap
 
-- Scansione ricorsiva delle sottodirectory
-- Esportazione del report in formato JSON
-- Gestione di segnali (es. `SIGINT` per terminazione pulita)
+- Recursive scanning of subdirectories
+- Export results to JSON
+- Signal handling (e.g., SIGINT for graceful termination)
 
----
-
-*Progetto realizzato nell'ambito del corso di Sistemi Operativi, Università degli studi di Camerino.*
+*Originally created for the Operating Systems course at XYZ University.*
