@@ -1,12 +1,14 @@
 # Build artifacts
 /build/
 /CMakeFiles/
+/cmake-build-debug
 CMakeCache.txt
 cmake_install.cmake
 Makefile
 *.o
 
 # VSCode
+.vscode
 .vscode/
 
 # Python cache
@@ -15,3 +17,6 @@ __pycache__/
 
 # Misc
 *~
+
+# CLion/JetBrains
+.idea/
