@@ -14,6 +14,9 @@ set(SOURCES
     src/utils.c
     src/filter.c
     src/options.c
+    src/fs_analyzer.c
+    src/stats_collector.c
+    src/sig_handler.c
 )
 add_executable(duana ${SOURCES})
 
@@ -58,3 +61,32 @@ add_executable(test_cli_parser
 )
 target_include_directories(test_cli_parser PRIVATE include)
 add_test(NAME test_cli_parser COMMAND test_cli_parser)
+
+add_executable(test_fs_analyzer
+        tests/unit/test_fs_analyzer.c
+        src/fs_analyzer.c
+        src/stats_collector.c
+        src/sig_handler.c
+        src/filter.c
+        src/utils.c
+        ${unity_SOURCE_DIR}/src/unity.c
+)
+target_include_directories(test_fs_analyzer PRIVATE include)
+add_test(NAME test_fs_analyzer COMMAND test_fs_analyzer)
+
+add_executable(test_stats_collector
+        tests/unit/test_stats_collector.c
+        src/stats_collector.c
+        src/utils.c
+        ${unity_SOURCE_DIR}/src/unity.c
+)
+target_include_directories(test_stats_collector PRIVATE include)
+add_test(NAME test_stats_collector COMMAND test_stats_collector)
+
+add_executable(test_sig_handler
+        tests/unit/test_sig_handler.c
+        src/sig_handler.c
+        ${unity_SOURCE_DIR}/src/unity.c
+)
+target_include_directories(test_sig_handler PRIVATE include)
+add_test(NAME test_sig_handler COMMAND test_sig_handler)
