@@ -2,10 +2,9 @@
 #define DUANA_UTILS_H
 
 #include <sys/types.h>
-#include <stddef.h>
 
 /**
- * @brief Format a byte count into a human-readable string.
+ * @brief Format a byte counts into a human-readable string.
  *
  * Converts the given number of bytes into a string with units B, KiB, MiB, or GiB,
  * formatted with two decimal places. The returned string is heap-allocated and
@@ -19,7 +18,7 @@ char *du_format_size(off_t bytes);
 /**
  * @brief Extract the file extension from a filename.
  *
- * Returns a lowercase, malloc-allocated string containing the extension (without the dot),
+ * Returns lowercase, malloc-allocated string containing the extension (without the dot),
  * or NULL if the filename has no extension or on allocation failure.
  * The caller is responsible for freeing the returned string.
  *
@@ -32,7 +31,7 @@ char *du_get_extension(const char *filename);
  * @brief Print an error message with project prefix to stderr.
  *
  * Wrapper around perror() that prefixes messages with "duana: <ctx>: ".
- * Uses the current errno value.
+ * Use the current errno value.
  *
  * @param ctx Context string to include in the error message.
  */
