@@ -7,7 +7,7 @@
 
 static const size_t SIZE_BUFFER_LEN = 32;
 
-char *du_format_size(off_t bytes) {
+char *du_format_size(const off_t bytes) {
     const char *units[] = {"B", "KiB", "MiB", "GiB"};
     double size = (double) bytes;
     int unit = 0;
@@ -26,12 +26,11 @@ char *du_get_extension(const char *filename) {
 
     const char *base = strrchr(filename, '/');
     const char *start = base ? base + 1 : filename;
-    const char *dot = strrchr(start, '.');
+    const char *ext = strrchr(start, '.');
 
-    if (!dot || dot == start || *(dot + 1) == '\0') return NULL;
+    if (!ext || ext == start || *(ext + 1) == '\0') return NULL;
 
-    const char *ext = dot + 1;
-    size_t len = strlen(ext);
+    const size_t len = strlen(ext);
     char *out = du_xmalloc(len + 1);
 
     for (size_t i = 0; i < len; i++) {
@@ -47,7 +46,7 @@ void du_perror(const char *ctx) {
     perror(NULL);
 }
 
-void *du_xmalloc(size_t size) {
+void *du_xmalloc(const size_t size) {
     void *p = malloc(size);
     if (!p) {
         fprintf(stderr, "duana: malloc failed\n");

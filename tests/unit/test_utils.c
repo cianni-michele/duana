@@ -57,17 +57,17 @@ void test_du_format_size_gib(void) {
 // Test cases for du_get_extension
 void test_du_get_extension_simple(void) {
     allocated_memory = du_get_extension("file.txt");
-    TEST_ASSERT_EQUAL_STRING("txt", allocated_memory);
+    TEST_ASSERT_EQUAL_STRING(".txt", allocated_memory);
 }
 
 void test_du_get_extension_uppercase(void) {
     allocated_memory = du_get_extension("photo.JPG");
-    TEST_ASSERT_EQUAL_STRING("jpg", allocated_memory);
+    TEST_ASSERT_EQUAL_STRING(".jpg", allocated_memory);
 }
 
 void test_du_get_extension_multiple_dots(void) {
     allocated_memory = du_get_extension("archive.tar.gz");
-    TEST_ASSERT_EQUAL_STRING("gz", allocated_memory);
+    TEST_ASSERT_EQUAL_STRING(".gz", allocated_memory);
 }
 
 void test_du_get_extension_hidden_file(void) {
@@ -82,7 +82,7 @@ void test_du_get_extension_empty_extension(void) {
 
 void test_du_get_extension_with_path(void) {
     allocated_memory = du_get_extension("/path/to/FILE.TxT");
-    TEST_ASSERT_EQUAL_STRING("txt", allocated_memory);
+    TEST_ASSERT_EQUAL_STRING(".txt", allocated_memory);
 }
 
 void test_du_get_extension_null(void) {
@@ -93,7 +93,6 @@ void test_du_get_extension_null(void) {
 int main(void) {
     UNITY_BEGIN();
 
-    // Test du_format_size
     RUN_TEST(test_du_format_size_zero);
     RUN_TEST(test_du_format_size_bytes);
     RUN_TEST(test_du_format_size_kib);
@@ -101,7 +100,6 @@ int main(void) {
     RUN_TEST(test_du_format_size_mib);
     RUN_TEST(test_du_format_size_gib);
 
-    // Test du_get_extension
     RUN_TEST(test_du_get_extension_simple);
     RUN_TEST(test_du_get_extension_uppercase);
     RUN_TEST(test_du_get_extension_multiple_dots);
