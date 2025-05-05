@@ -17,6 +17,7 @@ set(SOURCES
     src/fs_analyzer.c
     src/stats_collector.c
     src/sig_handler.c
+    src/report_writer.c
 )
 add_executable(duana ${SOURCES})
 
@@ -90,3 +91,12 @@ add_executable(test_sig_handler
 )
 target_include_directories(test_sig_handler PRIVATE include)
 add_test(NAME test_sig_handler COMMAND test_sig_handler)
+
+add_executable(test_report_writer
+        tests/unit/test_report_writer.c
+        src/report_writer.c
+        src/utils.c
+        ${unity_SOURCE_DIR}/src/unity.c
+)
+target_include_directories(test_report_writer PRIVATE include)
+add_test(NAME test_report_writer COMMAND test_report_writer)
