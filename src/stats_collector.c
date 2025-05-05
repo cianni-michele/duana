@@ -124,7 +124,7 @@ size_t du_stats_get_dirs(const DuStats *s, DirStatsArr **out) {
     if (!s || !out)
         return 0;
     const size_t n = s->dir_count;
-    *out = malloc(n * sizeof(DirStatsArr));
+    *out = du_xmalloc(n * sizeof(DirStatsArr));
     size_t idx = 0;
     for (size_t i = 0; i < s->dir_capacity; i++) {
         if (s->dir_table[i].key) {
@@ -134,6 +134,7 @@ size_t du_stats_get_dirs(const DuStats *s, DirStatsArr **out) {
             idx++;
         }
     }
+    (*out)[n].path = NULL;
     return n;
 }
 
@@ -151,6 +152,7 @@ size_t du_stats_get_exts(const DuStats *s, ExtStatsArr **out) {
             idx++;
         }
     }
+    (*out)[n].ext = NULL;
     return n;
 }
 
