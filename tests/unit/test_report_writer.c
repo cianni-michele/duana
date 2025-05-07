@@ -1,4 +1,3 @@
-#include "options.h"
 #include "report_writer.h"
 #include "stats_collector.h"
 #include "unity.h"
