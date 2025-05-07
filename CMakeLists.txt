@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 project(duana C)
 
 set(CMAKE_C_STANDARD 11)
@@ -6,6 +6,27 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/include)
+
+include(FetchContent)
+
+# Unity framework setup
+FetchContent_Declare(
+        unity
+        GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
+        GIT_TAG v2.5.2
+)
+FetchContent_MakeAvailable(unity)
+include_directories(${unity_SOURCE_DIR}/src)
+
+# CJSON library setup
+set(ENABLE_CJSON_TEST OFF CACHE INTERNAL "Disable cJSON tests")
+FetchContent_Declare(
+        cJSON
+        GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
+        GIT_TAG        v1.7.18
+)
+FetchContent_MakeAvailable(cJSON)
+include_directories(${cjson_SOURCE_DIR})
 
 # Source files
 set(SOURCES
@@ -18,20 +39,13 @@ set(SOURCES
     src/stats_collector.c
     src/sig_handler.c
     src/report_writer.c
+    src/json_export.c
 )
 add_executable(duana ${SOURCES})
+target_include_directories(duana PRIVATE ${cJSON_SOURCE_DIR})
+target_link_libraries(duana PRIVATE cJSON)
 
 enable_testing()
-
-# Unity framework setup
-include(FetchContent)
-FetchContent_Declare(
-        unity
-        GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
-        GIT_TAG v2.5.2
-)
-FetchContent_MakeAvailable(unity)
-include_directories(${unity_SOURCE_DIR}/src)
 
 # Unit tests
 add_executable(test_filter
@@ -100,3 +114,13 @@ add_executable(test_report_writer
 )
 target_include_directories(test_report_writer PRIVATE include)
 add_test(NAME test_report_writer COMMAND test_report_writer)
+
+add_executable(test_json_export
+        tests/unit/test_json_export.c
+        src/json_export.c
+        src/utils.c
+        ${cJSON_SOURCE_DIR}/cJSON.c
+        ${unity_SOURCE_DIR}/src/unity.c
+)
+target_include_directories(test_json_export PRIVATE include)
+add_test(NAME test_json_export COMMAND test_json_export)
