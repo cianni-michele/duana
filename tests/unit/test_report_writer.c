@@ -50,18 +50,18 @@ static char *capture_stdout(int (*test_fn)(void)) {
 }
 
 // Dati di test condivisi
-static const DirStatsArr test_dirs[] = {{"dir1", 2, 2048}, {NULL, 0, 0}};
-static const ExtStatsArr test_exts[] = {{".txt", 2, 2048}, {NULL, 0, 0}};
-static const DirStatsArr empty_dirs[] = {{NULL, 0, 0}};
-static const ExtStatsArr empty_exts[] = {{NULL, 0, 0}};
+static const DirStatsArr test_dirs[] = {{"dir1", 2, 2048}};
+static const ExtStatsArr test_exts[] = {{".txt", 2, 2048}};
+static const DirStatsArr empty_dirs[] = {};
+static const ExtStatsArr empty_exts[] = {};
 
 // Funzioni helper per i test
 static int call_print_single(void) {
-    return du_report_print(test_dirs, test_exts, 1024.0);
+    return du_report_print(test_dirs, 1, test_exts, 1, 1024.0);
 }
 
 static int call_print_empty(void) {
-    return du_report_print(empty_dirs, empty_exts, 0.0);
+    return du_report_print(empty_dirs, 0, empty_exts, 0, 0.0);
 }
 
 void setUp(void) {
@@ -76,7 +76,7 @@ void tearDown(void) {
 }
 
 void test_report_print_returns_zero_on_success(void) {
-    const int res = du_report_print(test_dirs, test_exts, 1024.0);
+    const int res = du_report_print(test_dirs, 1, test_exts, 1, 1024.0);
     TEST_ASSERT_EQUAL_INT(0, res);
 }
 
@@ -111,7 +111,7 @@ void test_report_contains_media_size(void) {
 }
 
 void test_report_returns_error_with_null_arrays(void) {
-    const int res = du_report_print(NULL, NULL, 0.0);
+    const int res = du_report_print(NULL, 0, NULL, 0, 0.0);
     TEST_ASSERT_EQUAL_INT(-1, res);
 }
 
