@@ -21,6 +21,7 @@ typedef struct {
     bool sort_desc;         // Sort descending if true
     bool json;              // Export JSON if true
     char *json_file;        // JSON output file (NULL -> stdout)
+    bool json_formatted;    // Format JSON output if true
     char **filter_exts;     // Array of file extensions to include
     size_t filter_count;    // Number of extensions in filter_exts
 } DuOptions;

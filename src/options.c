@@ -12,6 +12,7 @@ void du_options_init(DuOptions *opt) {
     opt->sort_desc = false;
     opt->json = false;
     opt->json_file = NULL;
+    opt->json_formatted = false;
     opt->filter_exts = NULL;
     opt->filter_count = 0;
 }
