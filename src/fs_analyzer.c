@@ -12,105 +12,55 @@
 #include <sys/stat.h>
 
 typedef struct {
-    dev_t dev;
-    ino_t ino;
-} DevIno;
+    char *path;
+} DirNode;
 
-static DevIno *visited     = NULL;
-static size_t visited_cnt  = 0;
-static size_t visited_cap  = 0;
+typedef struct {
+    DirNode *nodes;
+    size_t count;
+    size_t capacity;
+} DirStack;
 
-
-void du_scan_abort(void) {
-    du_set_cancelled();
-}
-
-/* Verifica se (dev,ino) è già stato visitato */
-static int is_visited(const dev_t dev, const ino_t ino) {
-    for (size_t i = 0; i < visited_cnt; ++i) {
-        if (visited[i].dev == dev && visited[i].ino == ino)
-            return 1;
-    }
+static int stack_init(DirStack *stack) {
+    stack->nodes = malloc(128 * sizeof(DirNode));
+    if (!stack->nodes)
+        return -1;
+    stack->count = 0;
+    stack->capacity = 128;
     return 0;
 }
 
-/* Aggiunge una nuova coppia (dev,ino) all’array di visitati */
-static int mark_visited(const dev_t dev, const ino_t ino) {
-    if (is_visited(dev, ino))
-        return 0;
-    if (visited_cnt == visited_cap) {
-        const size_t newcap = (visited_cap == 0 ? 128 : visited_cap * 2);
-        DevIno *tmp = realloc(visited, newcap * sizeof(*tmp));
-        if (!tmp) {
-            du_perror("realloc");  /* errore fatale */
+static void stack_free(DirStack *stack) {
+    for (size_t i = 0; i < stack->count; i++) {
+        free(stack->nodes[i].path);
+    }
+    free(stack->nodes);
+    stack->nodes = NULL;
+    stack->count = stack->capacity = 0;
+}
+
+static int stack_push(DirStack *stack, const char *path) {
+    if (stack->count == stack->capacity) {
+        const size_t newcap = stack->capacity * 2;
+        DirNode *tmp = realloc(stack->nodes, newcap * sizeof(DirNode));
+        if (!tmp)
             return -1;
-        }
-        visited     = tmp;
-        visited_cap = newcap;
+        stack->nodes = tmp;
+        stack->capacity = newcap;
     }
-    visited[visited_cnt].dev = dev;
-    visited[visited_cnt].ino = ino;
-    visited_cnt++;
+    stack->nodes[stack->count].path = strdup(path);
+    if (!stack->nodes[stack->count].path)
+        return -1;
+    stack->count++;
     return 0;
 }
 
-/* Funzione ricorsiva interna */
-static int scan_dir(const char *path, const DuOptions *opt, DuStats *stats) {
-    DIR *d = opendir(path);
-    if (!d) {
-        if (errno == EACCES)
-            du_perror(path);
-        else
-            du_perror(path);
-        return 0;  /* skip senza interrompere */
-    }
-
-    struct dirent *entry;
-    while (!du_is_cancelled() && (entry = readdir(d)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0 ||
-            strcmp(entry->d_name, "..") == 0)
-            continue;
-
-        /* Componi percorso completo */
-        const size_t len = strlen(path) + strlen(entry->d_name) + 2;
-        char *full = du_xmalloc(len);
-        snprintf(full, len, "%s/%s", path, entry->d_name);
-
-        struct stat st;
-        if (lstat(full, &st) < 0) {
-            if (errno == EACCES)
-                du_perror(full);
-            else
-                du_perror(full);
-            free(full);
-            continue;
-        }
-
-        if (S_ISDIR(st.st_mode)) {
-            /* Prevenzione loop simbolici */
-            if (mark_visited(st.st_dev, st.st_ino) < 0) {
-                free(full);
-                closedir(d);
-                return -1;
-            }
-            scan_dir(full, opt, stats);
-        }
-        else if (S_ISREG(st.st_mode)) {
-            /* File regolare: applica filtro estensioni */
-            char* ext = du_get_extension(entry->d_name);
-            const int ok = du_filter_match(opt, ext ? ext : "");
-            if (ok) {
-                du_stats_update_file(stats, path, ext, st.st_size);
-            }
-            free(ext);
-        }
-        /* Altri tipi (link, socket, device, FIFO) vengono ignorati */
-
-        free(full);
-    }
-
-    closedir(d);
-    return 0;
+static int stack_pop(DirStack *stack, char **path) {
+    if (stack->count == 0)
+        return 0;
+    stack->count--;
+    *path = stack->nodes[stack->count].path;
+    return 1;
 }
 
 int du_scan_directory(const char *root, const DuOptions *opt, DuStats *stats) {
@@ -120,28 +70,65 @@ int du_scan_directory(const char *root, const DuOptions *opt, DuStats *stats) {
     }
 
     struct stat st;
-    if (lstat(root, &st) < 0) {
+    if (lstat(root, &st) < 0 || !S_ISDIR(st.st_mode)) {
         du_perror(root);
-        return -1;
-    }
-    if (!S_ISDIR(st.st_mode)) {
-        du_perror(root);
-        errno = ENOTDIR;
+        errno = (!S_ISDIR(st.st_mode)) ? ENOTDIR : errno;
         return -1;
     }
 
-    visited     = NULL;
-    visited_cnt = 0;
-    visited_cap = 0;
-    if (mark_visited(st.st_dev, st.st_ino) < 0)
+    DirStack stack;
+    if (stack_init(&stack) < 0)
         return -1;
 
-    const int res = scan_dir(root, opt, stats);
+    if (stack_push(&stack, root) < 0) {
+        stack_free(&stack);
+        return -1;
+    }
 
-    free(visited);
-    visited     = NULL;
-    visited_cnt = visited_cap = 0;
+    while (stack.count > 0 && !du_is_cancelled()) {
+        char *current;
+        if (!stack_pop(&stack, &current))
+            break;
 
-    return res;
+        DIR *d = opendir(current);
+        if (!d) {
+            du_perror(current);
+            free(current);
+            continue;
+        }
+        struct dirent *entry;
+        while (!du_is_cancelled() && (entry = readdir(d)) != NULL) {
+            if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+                continue;
+            size_t len = strlen(current) + strlen(entry->d_name) + 2;
+            char *full_path = du_xmalloc(len);
+            snprintf(full_path, len, "%s/%s", current, entry->d_name);
+            struct stat entry_st;
+            if (lstat(full_path, &entry_st) < 0) {
+                du_perror(full_path);
+                free(full_path);
+                continue;
+            }
+            if (S_ISDIR(entry_st.st_mode)) {
+                if (stack_push(&stack, full_path) < 0) {
+                    free(full_path);
+                    closedir(d);
+                    free(current);
+                    stack_free(&stack);
+                    return -1;
+                }
+            } else if (S_ISREG(entry_st.st_mode)) {
+                char *ext = du_get_extension(entry->d_name);
+                if (du_filter_match(opt, ext ? ext : ""))
+                    du_stats_update_file(stats, current, ext, entry_st.st_size);
+                free(ext);
+            }
+            free(full_path);
+        }
+        closedir(d);
+        free(current);
+    }
+
+    stack_free(&stack);
+    return 0;
 }
-
