@@ -1,9 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include "stats_collector.h"
 #include "unity.h"
+#include <stdlib.h>
+#include <string.h>
 
 static DuStats *s = NULL;
 static DirStatsArr *dirs = NULL;
@@ -181,6 +179,7 @@ void test_null_ext_parameter_is_ignored(void) {
 
 int main(void) {
     UNITY_BEGIN();
+
     RUN_TEST(test_initialization_returns_valid_instance);
     RUN_TEST(test_empty_stats_has_no_dirs_or_exts);
     RUN_TEST(test_adding_single_file_updates_dir_stats);
@@ -193,5 +192,6 @@ int main(void) {
     RUN_TEST(test_finalize_makes_stats_immutable);
     RUN_TEST(test_null_dir_parameter_is_ignored);
     RUN_TEST(test_null_ext_parameter_is_ignored);
+
     return UNITY_END();
 }
