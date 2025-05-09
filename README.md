@@ -1,101 +1,146 @@
-# Disk Usage Analyzer (`duana`)
+# duana – Disk Usage Analyzer (CLI, C/Linux)
 
-**duana** is a command-line tool that analyzes disk usage within a single directory by counting files and summing their sizes. It also supports filtering files by extension.
+**duana** is a command-line application written in C for Linux systems (Ubuntu), designed to recursively analyze a directory and generate a detailed disk usage report. It supports advanced options such as extension filters, sorting, and JSON export.
 
 ---
 
-## Features
+## 📂 Project Structure
 
-- **File counting**: Counts the regular files in the specified directory.
-- **Size aggregation**: Computes the total size (in bytes) of all counted files.
-- **Extension filter**: `--types` option to include only files with given extensions (e.g. `--types=.c,.txt`).
-- **Modular design**: Components separated into `cli`, `config`, `scanner`, `utils`, and `output` modules.
-- **Testing**: Unit tests in C and integration tests in Python (pytest).
-- **Code style**: Formatted with `.clang-format` using the LLVM style.
-
-## Requirements
-
-- Ubuntu (or compatible Linux distribution)
-- C compiler with C11 support (e.g., `gcc` ≥ 5.0)
-- [CMake](https://cmake.org/) ≥ 3.10
-- Python 3 and [pytest](https://docs.pytest.org/)
-
-## Build Instructions
-
-From the project root, run:
-
-```bash
-mkdir -p build && cd build
-cmake ..
-cmake --build .
 ```
-
-This creates the `duana` executable and unit tests.
-
-## Usage
-
-```bash
-./duana <directory> [--types=.ext1,.ext2,...]
-```
-
-- `<directory>`: Path to the directory to analyze.
-- `--types=<ext_list>`: (optional) Comma-separated list of extensions to include.
-
-### Examples
-
-```bash
-# Analyze /home/user/docs without filtering
-./duana /home/user/docs
-
-# Analyze /home/user/src, counting only .c and .h files
-./duana /home/user/src --types=.c,.h
-```
-
-Output format:
-
-```plaintext
-Directory: /home/user/docs
-Total files: 42
-Total size: 1234567 bytes
-```
-
-## Tests
-
-From the `build` directory:
-
-```bash
-# Run C unit tests with CTest
-ctest --output-on-failure
-
-# Run Python integration tests from project root
-pytest tests/integration_py
-```
-
-## Code Formatting
-
-Ensure consistent style with:
-
-```bash
-clang-format -i $(find . -name '*.c' -o -name '*.h')
-```
-
-## Project Structure
-
-```plaintext
 duana/
-├── include/            # Public header files
-├── src/                # C source files
-├── tests/              # Unit and integration tests
-├── .clang-format       # clang-format configuration
-├── CMakeLists.txt      # Build script
-├── .gitignore
-└── build/              # Out-of-source build directory
+├── include/       # Header files (.h)
+├── src/           # Source code (.c)
+├── tests/         # Unit and manual tests
+├── CMakeLists.txt # Build configuration
+├── Makefile       # Alternative to CMake
+└── README.md      # Documentation
 ```
 
-## Roadmap
+### Main Modules:
 
-- Recursive scanning of subdirectories
-- Export results to JSON
-- Signal handling (e.g., SIGINT for graceful termination)
+* `cli_parser` – CLI argument parsing
+* `fs_analyzer` – recursive filesystem traversal
+* `stats_collector` – data collection and aggregation
+* `report_writer` – textual report generation
+* `json_export` – JSON report export
+* `filter` – extension filtering
+* `sorter` – data sorting
+* `sig_handler` – safe signal handling (SIGINT)
+* `utils` – utility functions (e.g., size formatting)
 
-*Originally created for the Operating Systems course at University of Camerino.*
+---
+
+## ⚙️ Compilation
+
+You can compile the project with **CMake**:
+
+```bash
+cmake -B build
+cmake --build build
+```
+
+
+### Optional Dependencies
+
+For JSON export, the project uses the [`cJSON`](https://github.com/DaveGamble/cJSON) library. Check if it is installed:
+
+```bash
+pkg-config --exists libcjson && echo "cJSON available"
+```
+
+---
+
+## 🚀 Execution
+
+Basic command:
+
+```bash
+./duana <path> [--sort={size,count}] [--desc] [--filter=ext1,ext2] [ --json[=file] [--formatted] ]
+```
+
+Example:
+
+```bash
+./duana /home/user/docs --sort=size --filter=.pdf,.docx --json=report.json
+```
+
+---
+
+## 🛠️ Available Options
+
+| Option                         | Description                                         |
+|--------------------------------|-----------------------------------------------------|
+| `--sort=size` / `--sort=count` | Sort by size or file count                          |
+| `--desc`                       | Sort in descending order                            |
+| `--filter=.txt,.c,...`         | Analyze only files with the listed extensions (CSV) |
+| `--json`                       | Export to stdout in JSON format                     |
+| `--json=report.json`           | Export to `report.json` file                        |
+| `--formatted`                  | Formatted output (human-readable)                   |
+
+---
+
+## 🧲 Signal Handling
+
+Pressing `Ctrl+C`, the program handles the `SIGINT` signal properly, aborting the scan safely without corrupting partial data.
+
+---
+
+## 🧪 Testing
+
+### Manual Tests
+
+You can run manually compiled tests:
+
+```bash
+./build/test_cli_parser
+```
+
+---
+
+## ❗ Error Handling and Logging
+
+* Errors are **printed to `stderr`**, never to `stdout`
+* The program **does not stop** in case of:
+
+    * missing permissions (`EACCES`)
+    * unreadable special files
+    * disk space exhausted during export
+
+---
+
+## 📦 JSON Format
+
+Example structure:
+
+```json
+{
+  "directories": [
+    { "path": "/home/user/docs", "totalSize": 1234567, "fileCount": 42 },
+    "..."
+  ],
+  "extensions": [
+    { "ext": ".pdf", "totalSize": 456789, "fileCount": 10 },
+    "..."
+  ],
+  "avgFileSize": 29400.34
+}
+```
+
+* UTF-8 encoding
+* Proper escaping for special characters
+* Atomic file writing to temporary `.tmp` file (with final `rename()`)
+
+---
+
+## 👨‍💻 License and Author
+
+This project is licensed under the **MIT License**.  
+See the [LICENSE](./LICENCE) file for more information.
+
+**Author:** Michele Cianni
+
+**University Course:** Operating Systems – 2024/25
+
+**University:** University of Camerino
+
+**Email:** michele.cianni@studenti.unicam.it
