@@ -32,18 +32,19 @@ static char *double_format_size(const double bytes) {
     return res;
 }
 
-int du_report_print(const DirStatsArr *dirs, const ExtStatsArr *exts, const double avg) {
+int du_report_print(const DirStatsArr *dirs, const size_t dir_count,
+                    const ExtStatsArr *exts, const size_t ext_count,
+                    const double avg) {
     if (!dirs || !exts) {
         errno = EINVAL;
         return -1;
     }
     // Section: directories
     if (fprintf(stdout, "Directories:\n") < 0) return -1;
-    for (size_t i = 0; dirs[i].path != NULL; i++) {
+    for (size_t i = 0; i < dir_count; i++) {
         char *size_str = du_format_size(dirs[i].total_size);
         if (!size_str) return -1;
-        if (fprintf(stdout, "%-30s %10zu %10s\n",
-                    dirs[i].path, dirs[i].file_count, size_str) < 0) {
+        if (fprintf(stdout, "%-30s %10zu %10s\n", dirs[i].path, dirs[i].file_count, size_str) < 0) {
             free(size_str);
             return -1;
                     }
@@ -51,7 +52,7 @@ int du_report_print(const DirStatsArr *dirs, const ExtStatsArr *exts, const doub
     }
     // Section: extensions
     if (fprintf(stdout, "\nExtensions:\n") < 0) return -1;
-    for (size_t i = 0; exts[i].ext != NULL; i++) {
+    for (size_t i = 0; i < ext_count; i++) {
         char *size_str = du_format_size(exts[i].total_size);
         if (!size_str) return -1;
         if (fprintf(stdout, "%-30s %10zu %10s\n",
