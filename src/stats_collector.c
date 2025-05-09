@@ -134,7 +134,6 @@ size_t du_stats_get_dirs(const DuStats *s, DirStatsArr **out) {
             idx++;
         }
     }
-    (*out)[n].path = NULL;
     return n;
 }
 
@@ -152,7 +151,6 @@ size_t du_stats_get_exts(const DuStats *s, ExtStatsArr **out) {
             idx++;
         }
     }
-    (*out)[n].ext = NULL;
     return n;
 }
 
@@ -163,11 +161,14 @@ double du_stats_get_avg_size(const DuStats *s) {
 void du_stats_destroy(DuStats *s) {
     if (!s) return;
     for (size_t i = 0; i < s->dir_capacity; i++) {
-        if (s->dir_table[i].key) free(s->dir_table[i].key);
+        if (s->dir_table[i].key) {
+            free(s->dir_table[i].key);
+        }
     }
-    free(s->dir_table);
     for (size_t i = 0; i < s->ext_capacity; i++) {
-        if (s->ext_table[i].key) free(s->ext_table[i].key);
+        if (s->ext_table[i].key) {
+            free(s->ext_table[i].key);
+        }
     }
     free(s->ext_table);
     free(s);
